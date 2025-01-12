@@ -1,73 +1,95 @@
 ﻿using System;
-using System.Diagnostics; // To open the PDF file automatically
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
+using test_for_pattern_draftting;
 
-class PatternDraftingProgram
+class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        try
+        Console.WriteLine("Welcome to the Pattern Drafting Program!");
+
+        // Main program loop
+        bool running = true;
+        while (running)
         {
-            // Input measurements
-            double chest = 100; // cm
-            double halfBack = 20; // cm
-            double backNeckToWaist = 44.2; // cm
-            double syceDepth = 24.4; // cm
+            Console.WriteLine("\nSelect an option:");
+            Console.WriteLine("1. Draft a Basic Block Pattern");
+            Console.WriteLine("2. View Saved Drafts");
+            Console.WriteLine("3. Exit");
 
-            // Calculate points
-            double point0X = 50, point0Y = 50; // Starting point
-            double point1X = point0X, point1Y = point0Y + backNeckToWaist + 1;
-            double point2X = point0X, point2Y = point0Y + 80; // Example finished length
-            double point3X = point0X, point3Y = point0Y + syceDepth + 1;
+            Console.Write("Enter your choice: ");
+            string choice = Console.ReadLine();
 
-            // Create a new PDF document
-            PdfDocument document = new PdfDocument();
-            document.Info.Title = "Pattern Draft";
-
-            // Add a page to the document
-            PdfPage page = document.AddPage();
-            XGraphics gfx = XGraphics.FromPdfPage(page);
-
-            // Draw points and lines based on the instructions
-            XPen pen = new XPen(XColors.Black, 1);
-
-            // Mark and label the points
-            DrawPoint(gfx, point0X, point0Y, "0");
-            DrawPoint(gfx, point1X, point1Y, "1");
-            DrawPoint(gfx, point2X, point2Y, "2");
-            DrawPoint(gfx, point3X, point3Y, "3");
-
-            // Draw lines connecting points
-            gfx.DrawLine(pen, point0X, point0Y, point1X, point1Y);
-            gfx.DrawLine(pen, point0X, point0Y, point3X, point3Y);
-
-            // Save the PDF to the Desktop
-            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            string filename = System.IO.Path.Combine(desktopPath, "PatternDraft.pdf");
-            document.Save(filename);
-            Console.WriteLine($"PDF saved as {filename}");
-
-            // Open the PDF file automatically
-            Process.Start(new ProcessStartInfo
+            switch (choice)
             {
-                FileName = filename,
-                UseShellExecute = true // Use the default PDF viewer to open the file
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
+                case "1":
+                    DraftBasicBlockPattern();
+                    break;
+
+                case "2":
+                    ViewSavedDrafts();
+                    break;
+
+                case "3":
+                    running = false;
+                    Console.WriteLine("Exiting the program. Goodbye!");
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid choice. Please try again.");
+                    break;
+            }
         }
     }
 
-    static void DrawPoint(XGraphics gfx, double x, double y, string label)
+    private static void DraftBasicBlockPattern()
     {
-        // Draw a small circle to mark the point
-        gfx.DrawEllipse(XPens.Black, XBrushes.Black, x - 2, y - 2, 4, 4);
+        Console.WriteLine("\nEnter the following measurements:");
 
-        // Label the point
-        XFont font = new XFont("Arial", 10);
-        gfx.DrawString(label, font, XBrushes.Black, new XPoint(x + 5, y - 5));
+        Console.Write("Chest (cm): ");
+        double chest = GetValidDouble();
+
+        Console.Write("Half Back (cm): ");
+        double halfBack = GetValidDouble();
+
+        Console.Write("Back Neck to Waist (cm): ");
+        double backNeckToWaist = GetValidDouble();
+
+        Console.Write("Syce Depth (cm): ");
+        double syceDepth = GetValidDouble();
+
+        Console.Write("Enter a file name for the draft (e.g., MyDraft.pdf): ");
+        string fileName = Console.ReadLine();
+
+        // Create a PatternDrafting instance and generate the pattern
+        PatternDrafting drafting = new PatternDrafting(chest, halfBack, backNeckToWaist, syceDepth);
+        string filePath = $"{fileName}.pdf";
+
+        try
+        {
+            drafting.DraftBasicBlockPattern(filePath);
+            Console.WriteLine($"Pattern successfully drafted and saved as {filePath}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error while drafting the pattern: {ex.Message}");
+        }
+    }
+
+    private static void ViewSavedDrafts()
+    {
+        Console.WriteLine("\nFeature not implemented yet!");
+        // Placeholder for future implementation
+        // Could involve listing files in a directory or querying a database
+    }
+
+    private static double GetValidDouble()
+    {
+        while (true)
+        {
+            if (double.TryParse(Console.ReadLine(), out double value) && value > 0)
+                return value;
+
+            Console.Write("Invalid input. Please enter a valid positive number: ");
+        }
     }
 }
